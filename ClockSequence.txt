@@ -1,0 +1,82 @@
+https://projecteuler.net/problem=506
+
+"Consider the infinite repeating sequence of digits: 1234321234321234321...
+Amazingly, you can break this sequence of digits into a sequence of integers such that the sum of the digits in the n'th value is n."
+
+First, it turns out that the numbers (1, 2, 3, 4, 3, 2) are actually the non-zero partial differences of the sorted triangle numbers mod 15:
+
+1, T_1 = 1, T_1 mod 15 = 1
+2, T_2 = 3, T_2 mod 15 = 3
+3, T_3 = 6, T_3 mod 15 = 6
+4, T_4 = 10, T_4 mod 15 = 10
+5, T_5 = 15, T_5 mod 15 = 0
+6, T_6 = 21, T_6 mod 15 = 6
+7, T_7 = 28, T_7 mod 15 = 13
+8, T_8 = 36, T_8 mod 15 = 6
+9, T9 = 45, T mod 15 = 0
+10, T_10 = 55, T_10 mod 15 = 10
+11, T_11 = 66, T_11 mod 15 = 6
+12, T_12 = 78, T_12 mod 15 = 3
+13, T_13 = 91, T_13 mod 15 = 1
+14, T_14 = 105, T_14 mod 15 = 0
+15, T_15 = 120, T_15 mod 15 = 0
+
+Sort these guys and we get 0, 0, 0, 0, 1, 1, 3, 6, 6, 6, 6, 6, 10, 10, 13
+
+Let's tack on a 15 to the end just to complete the cycle: 0, 0, 0, 0, 1, 1, 3, 6, 6, 6, 6, 6, 10, 10, 13, 15
+
+If we take the partial differences (differences between neighboring terms), we get: 0, 0, 0, 1, 0, 2, 3, 0, 0, 0, 4, 0, 3, 2
+
+Now remove the zero's and we get: 1, 2, 3, 4, 3, 2
+
+Intuitively, these partial differences are exactly the "smallest" set of numbers needed to us from any T_i to it's neighbor T_(i+1).
+
+A more formal proof that it works:
+
+Definitions
+Let A = (1, 2, 3, 4, 3, 2)
+Let A' be the infinite sequence which repeats A.
+Let S(A) be the statement that "A' can be partitioned into a sequence of sequences (b_1, b_2, ...) where the sum of the elements in b_n is equal to n."
+Let S'(A) be the statement that "For every triangular number T_n, there exists an index c_n in A' where sum of all elements from the start of the sequence to c_n is equal to T_n"
+
+Claim 1: S(A) is equivalent to S'(A).
+Proof 1: If we had the sequence (b_1, b_2, ...), then we just take the index of the last element in b_n as our c_n. E.g. if we have (1), (2), (3), (4), (3, 2) then c_5 would be 6 since 2 is the last element in (3, 2) and is at index 6 in the entire sequence.
+For the reverse direction, if you had a c_n for each triangular number, then you define your sequence b_n to start from index "c_(n-1) + 1" and end at index c_n.
+
+Claim 2: Sum of elements in A are equivalent to 0 mod 15.
+Proof 2:
+Since the sum of elements is exactly 15, we're fine here.
+
+Claim 3: T_(n+15) is equivalent to T_n mod 15 for any n
+Proof 3:
+Couple ways to do this but the easiest is probably to use this property of triangular numbers:
+Ta + T_b + ab = T(a+b)
+
+So, let's fix 15 for b and re-arrange some terms:
+Ta + T_15 + 15 * b = T(a+15) T15 + 15 * b = T(a + 15) - T_a
+
+Since 15 definitely divides T_15 (remember N * (N + 1) / 2), and 15 divides 15 * b, then 15 must divide the right hand side, and we know they are equivalent to 0 mod 15, i.e. differ by some multiple of 15.
+
+Claim 4: S'(A) is true.
+Proof 4:
+Let's use induction.
+Let P(n) be the statement that "For a positive integer n, there exists an index c_n in A where the sum of all elements from the start of the sequence to c_n is equal to T_n".
+Base case: We'll need to show that P(T_i) is true for i from 1 to 15.
+This we can just brute force.
+
+Inductive Step:
+Assume P(n), then we'll prove P(n + 15).
+
+Okay, now to prove the inductive step.
+Assume that we have some P(n). We want to show P(n + 15).
+By the inductive hypothesis, we have a c_n which gets us to T_n. From Claim 3, we know P(n) and P(n+15) differ by some multiple of 15. From Claim 2 we know that the sequence A sums to 15. So, our c_(n+15) can be found by tacking on cycles of A to c_n until we reach T(n+15).
+
+Since S'(A) implies S(A), then we're done :)
+
+q.e.d.
+
+To prove this generically for any K aside from 15, we just need to replace the base case in the proof with a more rigorous explanation of the partial differences part.
+
+One might ask, why remove the 0's?  Well, you don't have to, you can leave them in actually.
+
+One might ask, why do we sort before taking partial differences?  This is to ensure that we always account for the "minimal" possible gap between any of the value mod K.
